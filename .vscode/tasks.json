@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Execute Build Script",
+			"command": "sh ${workspaceFolder}/build.sh",
+			"problemMatcher": []
+		}
+	]
+}
