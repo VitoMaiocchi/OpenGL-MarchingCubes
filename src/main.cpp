@@ -45,9 +45,23 @@ int main()
 
     VertexData vertexData;
 
+	GLuint MatrixID = glGetUniformLocation(shaderProgram.ID, "matrix");
+
+	float angle = 0.0f;
+
+	glEnable(GL_CULL_FACE);
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+
+		GLfloat matrix[3][3] = {
+			cosf(angle), 0, sinf(angle),
+			0, 0.8, -0.2,
+			-sinf(angle), 0.2, cosf(angle) * 0.8f
+		};
+		angle = angle + 0.01f;
+
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
@@ -55,6 +69,9 @@ int main()
 		// Tell OpenGL which Shader Program we want to use
 
 		shaderProgram.Activate();
+
+		glUniformMatrix3fv(MatrixID, 1, GL_FALSE, &matrix[0][0]);
+
         vertexData.Draw();
 
 		// Swap the back buffer with the front buffer

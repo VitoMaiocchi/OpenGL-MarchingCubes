@@ -3,15 +3,34 @@
 VertexData::VertexData() {
 	// Vertices coordinates
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f 
+		-0.5f, -0.5f,  0.5f,		1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,		0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,		0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,		0.0f, 0.9f, 0.7f,
+		-0.5f, -0.5f, -0.5f,		1.0f, 0.2f, 0.0f,
+         0.5f, -0.5f, -0.5f,		0.0f, 1.0f, 0.2f,
+         0.5f,  0.5f, -0.5f,		0.0f, 2.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,		0.2f, 0.9f, 0.7f
 	};
 
     GLuint indices[] = {
         0, 1, 2,
-        2, 3, 0
+        0, 2, 3,
+
+		4, 6, 5,
+        7, 6, 4,
+
+		3, 2, 6,
+        3, 6, 7,
+
+		1, 5, 6,
+        1, 6, 2,
+
+		4, 5, 1,
+        4, 1, 0,
+
+		4, 0, 3,
+        4, 3, 7,
     };
 
     vert_size = sizeof(vertices);
@@ -33,10 +52,10 @@ VertexData::VertexData() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indi_size, indices, GL_STATIC_DRAW);
 
-	// Configure the Vertex Attribute so that OpenGL knows how to read the VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	// Enable the Vertex Attribute so that OpenGL knows to use it
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
