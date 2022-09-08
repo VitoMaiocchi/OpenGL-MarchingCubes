@@ -16,7 +16,6 @@ void main()
    vec3 transformed = rotation * (aPos - transform);
    transformed.x = transformed.x / abs(transformed.z) * factor;
    transformed.y = transformed.y / abs(transformed.z) * factor;
-   //transformed.z = transformed.z / 200;
    transformed.z = (transformed.z - near_plane) * 2/render_distance - 1;
    gl_Position = vec4(transformed, 1.0);
    color = aCol;

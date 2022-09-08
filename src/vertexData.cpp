@@ -1,16 +1,42 @@
 #include "vertexData.h"
+#include "marchingCubes.h"
+#include <vector>
+#include <iostream>
 
 VertexData::VertexData() {
 	// Vertices coordinates
+
+	/*
 	GLfloat vertices[] = {
-		-0.5f, -0.5f,  0.5f,		1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,		0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,		0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,		0.0f, 0.9f, 0.7f,
-		-0.5f, -0.5f, -0.5f,		1.0f, 0.2f, 0.0f,
-         0.5f, -0.5f, -0.5f,		0.0f, 1.0f, 0.2f,
-         0.5f,  0.5f, -0.5f,		0.0f, 2.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,		0.2f, 0.9f, 0.7f
+		-0.5f, -0.5f,  0.5f,		0.0f, 0.0f, 1.0f, 
+         0.5f, -0.5f,  0.5f,		0.0f, 0.0f, 1.0f, 
+         0.5f,  0.5f,  0.5f,		0.0f, 0.0f, 1.0f, 
+        -0.5f,  0.5f,  0.5f,		0.0f, 0.0f, 1.0f, 
+
+		-0.5f, -0.5f, -0.5f,		0.0f, 0.0f, -1.0f, 
+         0.5f, -0.5f, -0.5f,		0.0f, 0.0f, -1.0f, 
+         0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f, 
+        -0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f, 
+
+		 0.5f,  0.5f,  0.5f,		0.0f, 1.0f, 0.0f, 
+        -0.5f,  0.5f,  0.5f,		0.0f, 1.0f, 0.0f, 
+		 0.5f,  0.5f, -0.5f,		0.0f, 1.0f, 0.0f, 
+        -0.5f,  0.5f, -0.5f,		0.0f, 1.0f, 0.0f, 
+
+		 0.5f, -0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 
+         0.5f,  0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 
+		 0.5f, -0.5f, -0.5f,		1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,		1.0f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 
+         0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 
+		-0.5f, -0.5f, -0.5f,		0.0f, -1.0f, 0.0f,  
+         0.5f, -0.5f, -0.5f,		0.0f, -1.0f, 0.0f,  
+
+		-0.5f, -0.5f,  0.5f,		-1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,		-1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,		-1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,		-1.0f, 0.0f, 0.0f,
 	};
 
     GLuint indices[] = {
@@ -20,18 +46,31 @@ VertexData::VertexData() {
 		4, 6, 5,
         7, 6, 4,
 
-		3, 2, 6,
-        3, 6, 7,
+		9, 8, 10,
+        9, 10, 11,
 
-		1, 5, 6,
-        1, 6, 2,
+		12, 14, 15,
+        12, 15, 13,
 
-		4, 5, 1,
-        4, 1, 0,
+		18, 19, 17,
+        18, 17, 16,
 
-		4, 0, 3,
-        4, 3, 7,
+		22, 20, 21,
+        22, 21, 23,
     };
+	*/
+
+
+	std::vector<GLfloat> Vertices;
+	std::vector<GLuint> Indices;
+
+	generateArrays(&Vertices, &Indices);
+
+	GLfloat vertices[Vertices.size()];
+	std::copy(Vertices.begin(), Vertices.end(), vertices);
+
+	GLuint indices[Indices.size()];
+	std::copy(Indices.begin(), Indices.end(), indices);	
 
     vert_size = sizeof(vertices);
     indi_size = sizeof(indices);
