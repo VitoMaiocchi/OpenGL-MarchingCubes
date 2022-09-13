@@ -1,10 +1,7 @@
 #include "marchingCubes.h"
 #include <cstdlib>
 #include <cmath>
-
-int chunk_size[3] = {10, 10, 10};
-float dimensions = 0.2f;
-float threshold = 0.0f;
+#include <iostream>
 
 int Edges[12][2] = {
     0,1,
@@ -313,8 +310,32 @@ char triTable[256][16] = {
 {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
+int chunk_size[3] = {30, 30, 30};
+float dimensions = 0.122f;
+//float threshold = 0.0f;
+
+Vector3f vectors[] = {
+    Vector3f(1.0, 1.0, 1.0),
+    Vector3f(1.0, 1.0, -1.0),
+    Vector3f(1.0, -1.0, -1.0),
+    Vector3f(1.0, -1.0, 1.0),
+    Vector3f(-1.0, 1.0, 1.0),
+    Vector3f(-1.0, 1.0, -1.0),
+    Vector3f(-1.0, -1.0, -1.0),
+    Vector3f(-1.0, -1.0, 1.0)
+};
+
+Vector3f rndVector(Vector3i vector) {
+    int seed = (vector.x * 23 + vector.y * 32 + vector.z * 65) * 13654;
+    int rnd = floor( (((float)((seed*seed*seed) % 105488) / 105488.0) + 1) * 4 );
+    //std::cout << vectors[rnd].print() << " rnd: " << rnd << std::endl;
+    return vectors[rnd];
+}
+
 void generateArrays(std::vector<GLfloat>* Vertecies, std::vector<GLuint>* Indices) {
 
+    for (float i = -1.0; i < 4; i = i + 0.1) std::cout << PerlinNoise(Vector3f(0.5,i,0.5)) << "  :  " << i << std::endl;
+    
     std::vector<GLfloat> vertecies = {};
     std::vector<GLuint> indices = {};
 
@@ -326,6 +347,10 @@ void generateArrays(std::vector<GLfloat>* Vertecies, std::vector<GLuint>* Indice
 
     *Vertecies = vertecies;
     *Indices = indices;
+}
+
+float linear_interpolate(float v1, float v2, float r) {
+    return v1 + (v2 - v1) * r;
 }
 
 void appendCube(std::vector<GLfloat>* vertecies, std::vector<GLuint>* indices, int index[3]) {
@@ -345,7 +370,7 @@ void appendCube(std::vector<GLfloat>* vertecies, std::vector<GLuint>* indices, i
     for (int i = 0; i < 8; i++) Values[i] = Noise_Function(Corners[i][0], Corners[i][1], Corners[i][2]);
 
     int CubeIndex = 0;
-    for(int i = 0; i < 8; i++) if (Values[i] < threshold) CubeIndex = CubeIndex + pow(2,i);
+    for(int i = 0; i < 8; i++) if (Values[i] < 0) CubeIndex = CubeIndex + pow(2,i);
 
     float VertexList[12][3];
 
@@ -356,12 +381,29 @@ void appendCube(std::vector<GLfloat>* vertecies, std::vector<GLuint>* indices, i
 
     for (int i = 0; i < 12; i++) {
         if(edgeTable[CubeIndex] & (int)pow(2,i) ) { //da chani den no richtig interpoliere
-            vertecies->push_back( (Corners[Edges[i][0]][0] + Corners[Edges[i][1]][0]) / 2);
-            vertecies->push_back( (Corners[Edges[i][0]][1] + Corners[Edges[i][1]][1]) / 2);
-            vertecies->push_back( (Corners[Edges[i][0]][2] + Corners[Edges[i][1]][2]) / 2);
-            vertecies->push_back( 0.0f ); // normal
-            vertecies->push_back( 0.0f );
-            vertecies->push_back( 0.0f );
+            //std::cout << linear_interpolate(-1, 1, 0.66) << std::endl;
+            float r1 = std::abs(Values[Edges[i][0]]) / std::abs(Values[Edges[i][1]]);
+            float r = r1 / (r1 + 1);
+            /*
+            std::cout << "VALUES: ";
+            std::cout << Edges[i][0] << ": " << Values[Edges[i][0]] << ",  " ;
+            std::cout << Edges[i][1] << ": " << Values[Edges[i][1]] << ",  " ;
+            std::cout << "r: " << r1;
+            std::cout << "R: " << r << std::endl; */
+            
+            //vertecies->push_back( (Corners[Edges[i][0]][0] + Corners[Edges[i][1]][0]) / 2);
+            //vertecies->push_back( (Corners[Edges[i][0]][1] + Corners[Edges[i][1]][1]) / 2);
+            //vertecies->push_back( (Corners[Edges[i][0]][2] + Corners[Edges[i][1]][2]) / 2);
+            
+            vertecies->push_back( linear_interpolate(Corners[Edges[i][0]][0], Corners[Edges[i][1]][0], r) );
+            vertecies->push_back( linear_interpolate(Corners[Edges[i][0]][1], Corners[Edges[i][1]][1], r) );
+            vertecies->push_back( linear_interpolate(Corners[Edges[i][0]][2], Corners[Edges[i][1]][2], r) );
+
+            std::vector<float> gradient = Noise_Function_gradient( (*vertecies)[location*6], (*vertecies)[location*6+1], (*vertecies)[location*6+2] );
+
+            vertecies->push_back( gradient[0] ); // normal
+            vertecies->push_back( gradient[1] );
+            vertecies->push_back( gradient[2] );
             VertexLocation[i] = location;
             location = location + 1;
         }
@@ -371,6 +413,85 @@ void appendCube(std::vector<GLfloat>* vertecies, std::vector<GLuint>* indices, i
 }
 
 float Noise_Function(float x, float y, float z) {
-    return x*x + y*y + z*z - 2;
-    //return static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+    
+    x = x - 1;
+    y = y - 1;
+    z = z - 1;
+    //return x*x + y*y + z*z - 0.9;
+    //std::cout << PerlinNoise(Vector3f(x, y, z)) << std::endl;
+    return PerlinNoise(Vector3f(x, y, z));
+}
+
+std::vector<float> Noise_Function_gradient(float x, float y, float z) {
+    x = x - 1;
+    y = y - 1;
+    z = z - 1;
+    /*
+    std::vector<float> gradient = {
+        2*x,
+        2*y,
+        2*z
+    };
+    */
+   std::vector<float> gradient = {x,y,z};
+    return gradient;
+}
+
+float Fade_function(float x) {
+    return 6*x*x*x*x*x - 15*x*x*x*x + 10*x*x*x;
+}
+
+float PerlinNoise(Vector3f vector) {
+
+    Vector3i corner = floor(vector);
+
+    //std::cout << vector.print() << ",  " << corner.print() << std::endl;
+
+/*
+    std::cout << "CORNER X: " << corner.x << std::endl;
+    std::cout << "CORNER Y: " << corner.y << std::endl;
+    std::cout << "CORNER Z: " << corner.z << std::endl;*/
+
+    Vector3i Corners[] = {
+        corner,
+        addVector(corner, Vector3i(1, 0, 0)),
+        addVector(corner, Vector3i(1, 0, 1)),
+        addVector(corner, Vector3i(0, 0, 1)),
+        addVector(corner, Vector3i(0, 1, 0)),
+        addVector(corner, Vector3i(1, 1, 0)),
+        addVector(corner, Vector3i(1, 1, 1)),
+        addVector(corner, Vector3i(0, 1, 1))
+    };
+
+    float Values[8];
+    //std::cout << "VALUES" << std::endl;
+    for (int i = 0; i < 8; i++) {
+        Values[i] = dotProduct(  rndVector(Corners[i])  , subtractVector(vector, Corners[i]));
+         //Values[i] = dotProduct(rndVector(addVector(Corners[i], subtractVector(vector, corner))), subtractVector(vector, Corners[i]));
+         //std::cout << i+1 <<": " << Corners[i].print()<< ",  "<< rndVector(Corners[i]).print() <<",  "<< subtractVector(vector, Corners[i]).print()  << std::endl;
+    }
+
+    vector = subtractVector(vector, corner);
+
+    /*
+    std::cout << "VALUES:  ";
+    for(int i = 0; i < 8; i++) {
+        std::cout << Values[i] << ", ";
+    }
+    std::cout << std::endl; 
+    */
+    float v12 = Values[0] + (Values[1] - Values[0])*Fade_function(vector.x);
+    float v56 = Values[4] + (Values[5] - Values[4])*Fade_function(vector.x);
+    float v87 = Values[7] + (Values[6] - Values[7])*Fade_function(vector.x);
+    float v43 = Values[3] + (Values[2] - Values[3])*Fade_function(vector.x);
+
+    //std::cout << "ADVANCED VALUES: "<< v12 << ", " << v56 << ", " << v87 << ", " << v43 << "  VECTOR.X: "<< Fade_function(vector.x) << std::endl;
+
+    float v1256 = v12 + (v56 - v12)*Fade_function(vector.y);
+    float v4387 = v43 + (v87 - v43)*Fade_function(vector.y);
+
+    //std::cout << "ADVANCED VALUES: "<< v12 << ", " << v56 << ", " << v87 << ", " << v43  << std::endl;
+    //std::cout << "ADVANCED VALUES: "<< v1256 << ", " << v4387 << "  VECTOR.Z: "<< Fade_function(vector.z) << std::endl;
+
+    return v1256 + (v4387 - v1256)*Fade_function(vector.z);
 }

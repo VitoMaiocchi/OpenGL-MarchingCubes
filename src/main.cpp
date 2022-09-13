@@ -43,6 +43,8 @@ int main() {
 	InputHandler InputHandler(window);
 	
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	int last_time = time(nullptr);
 
@@ -61,6 +63,7 @@ int main() {
 
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		shaderProgram.Activate();
 
