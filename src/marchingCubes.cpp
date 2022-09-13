@@ -334,7 +334,7 @@ Vector3f rndVector(Vector3i vector) {
 
 void generateArrays(std::vector<GLfloat>* Vertecies, std::vector<GLuint>* Indices) {
 
-    for (float i = -1.0; i < 4; i = i + 0.1) std::cout << PerlinNoise(Vector3f(0.5,i,0.5)) << "  :  " << i << std::endl;
+    //for (float i = -1.0; i < 4; i = i + 0.1) std::cout << PerlinNoise(Vector3f(0.5,i,0.5)) << "  :  " << i << std::endl;
     
     std::vector<GLfloat> vertecies = {};
     std::vector<GLuint> indices = {};
@@ -433,12 +433,17 @@ std::vector<float> Noise_Function_gradient(float x, float y, float z) {
         2*z
     };
     */
-   std::vector<float> gradient = {x,y,z};
+   Vector3f vector = PerlinNoise_gradient(Vector3f(x,y,z));
+   std::vector<float> gradient = {vector.x, vector.y, vector.z};
     return gradient;
 }
 
 float Fade_function(float x) {
     return 6*x*x*x*x*x - 15*x*x*x*x + 10*x*x*x;
+}
+
+float Fade_function_ableitung(float x) {
+    return 30*x*x*x*x - 60*x*x*x + 30*x*x;
 }
 
 float PerlinNoise(Vector3f vector) {
@@ -482,8 +487,9 @@ float PerlinNoise(Vector3f vector) {
     */
     float v12 = Values[0] + (Values[1] - Values[0])*Fade_function(vector.x);
     float v56 = Values[4] + (Values[5] - Values[4])*Fade_function(vector.x);
-    float v87 = Values[7] + (Values[6] - Values[7])*Fade_function(vector.x);
     float v43 = Values[3] + (Values[2] - Values[3])*Fade_function(vector.x);
+    float v87 = Values[7] + (Values[6] - Values[7])*Fade_function(vector.x);
+
 
     //std::cout << "ADVANCED VALUES: "<< v12 << ", " << v56 << ", " << v87 << ", " << v43 << "  VECTOR.X: "<< Fade_function(vector.x) << std::endl;
 
@@ -494,4 +500,73 @@ float PerlinNoise(Vector3f vector) {
     //std::cout << "ADVANCED VALUES: "<< v1256 << ", " << v4387 << "  VECTOR.Z: "<< Fade_function(vector.z) << std::endl;
 
     return v1256 + (v4387 - v1256)*Fade_function(vector.z);
+}
+
+Vector3f PerlinNoise_gradient(Vector3f vector) {
+    Vector3i corner = floor(vector);
+
+    Vector3i Corners[] = {
+        corner,
+        addVector(corner, Vector3i(1, 0, 0)),
+        addVector(corner, Vector3i(1, 0, 1)),
+        addVector(corner, Vector3i(0, 0, 1)),
+        addVector(corner, Vector3i(0, 1, 0)),
+        addVector(corner, Vector3i(1, 1, 0)),
+        addVector(corner, Vector3i(1, 1, 1)),
+        addVector(corner, Vector3i(0, 1, 1))
+    };
+
+    float Values[8];
+    Vector3f directions[8];
+    for (int i = 0; i < 8; i++) {
+        directions[i] = rndVector(Corners[i]);
+        Values[i] = dotProduct(  directions[i] , subtractVector(vector, Corners[i]));
+    }
+
+    vector = subtractVector(vector, corner);
+
+    float f_x = Fade_function(vector.x);
+    float df_x = Fade_function_ableitung(vector.x);
+    float f_y = Fade_function(vector.y);
+    float df_y = Fade_function_ableitung(vector.y);
+    float f_z = Fade_function(vector.z);
+    float df_z = Fade_function_ableitung(vector.z);
+
+    float v12 = Values[0] + (Values[1] - Values[0])*f_x;
+    float v56 = Values[4] + (Values[5] - Values[4])*f_x;
+    float v43 = Values[3] + (Values[2] - Values[3])*f_x;
+    float v87 = Values[7] + (Values[6] - Values[7])*f_x;
+
+    float v1256 = v12 + (v56 - v12)*f_y;
+    float v4387 = v43 + (v87 - v43)*f_y;
+
+    float dx_v12 = directions[0].x + (Values[1]-Values[0])*df_x + (directions[1].x - directions[0].x)*f_x;
+    float dx_v56 = directions[4].x + (Values[5]-Values[4])*df_x + (directions[5].x - directions[4].x)*f_x;
+    float dx_v43 = directions[3].x + (Values[2]-Values[3])*df_x + (directions[2].x - directions[3].x)*f_x;
+    float dx_v87 = directions[7].x + (Values[6]-Values[7])*df_x + (directions[6].x - directions[7].x)*f_x;
+
+    float dy_v12 = directions[0].y + (directions[1].y - directions[0].y)*f_x;
+    float dy_v56 = directions[4].y + (directions[5].y - directions[4].y)*f_x;
+    float dy_v43 = directions[3].y + (directions[2].y - directions[3].y)*f_x;
+    float dy_v87 = directions[7].y + (directions[6].y - directions[7].y)*f_x;
+
+    float dz_v12 = directions[0].z + (directions[1].z - directions[0].z)*f_x;
+    float dz_v56 = directions[4].z + (directions[5].z - directions[4].z)*f_x;
+    float dz_v43 = directions[3].z + (directions[2].z - directions[3].z)*f_x;
+    float dz_v87 = directions[7].z + (directions[6].z - directions[7].z)*f_x;
+
+    float dx_v1256 = dx_v12 + (dx_v56 - dx_v12)*f_y;
+    float dx_v4387 = dx_v43 + (dx_v87 - dx_v43)*f_y;
+
+    float dy_v1256 = dy_v12 + (v56 - v12)*df_y + (dy_v56 - dy_v12)*f_y;
+    float dy_v4387 = dy_v43 + (v87 - v43)*df_y + (dy_v87 - dy_v43)*f_y;
+
+    float dz_v1256 = dz_v12 + (dz_v56 - dz_v12)*f_y;
+    float dz_v4387 = dz_v43 + (dz_v87 - dz_v43)*f_y;
+
+    float dx_V = dx_v1256 + (dx_v4387 - dx_v1256)*f_z;
+    float dy_V = dy_v1256 + (dy_v4387 - dy_v1256)*f_z;
+    float dz_V = dz_v1256 + (v4387 - v1256)*df_z + (dz_v4387 - dz_v1256)*f_z;
+
+    return Vector3f(dx_V, dy_V, dz_V);
 }

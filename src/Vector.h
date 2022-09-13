@@ -6,6 +6,8 @@
 class Vector3f {
     public:
         Vector3f(float x, float y, float z);
+        Vector3f();
+        void set(float x, float y, float z);
         std::string print();
 
         float x, y, z;

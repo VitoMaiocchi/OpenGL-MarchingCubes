@@ -8,6 +8,15 @@ Vector3f::Vector3f(float x, float y, float z) {
     Vector3f::z = z;
 };
 
+Vector3f::Vector3f() {
+};
+
+void Vector3f::set(float x, float y, float z) {
+    Vector3f::x = x;
+    Vector3f::y = y;
+    Vector3f::z = z;
+};
+
 Vector3i::Vector3i(int x, int y, int z) {
     Vector3i::x = x;
     Vector3i::y = y;
