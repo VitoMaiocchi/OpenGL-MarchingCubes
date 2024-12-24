@@ -1,4 +1,5 @@
 #include "inputHandler.h"
+#include "main.hpp"
 #include <math.h>
 #include <iostream>
 #include <string>
@@ -24,21 +25,11 @@ InputHandler::InputHandler(GLFWwindow* window) {
     rotation[2][0] = 0;
     rotation[2][1] = 1;
     rotation[2][2] = 0;
-
-/*
-    GLfloat new_transform[3] = {3, 0, 0};
-    GLfloat new_rotation[9] = {
-        0, 0, -1,
-        -1, 0, 0,
-        0, 1, 0
-    };*/
-
 }
 
 void InputHandler::handleInput(int delta) {
-
-    int height, width;
-    glfwGetWindowSize(Window, &width, &height);
+    int height = viewport_height;
+    int width = viewport_width;
 
     float forward = 0;
     float right = 0;
@@ -65,12 +56,11 @@ void InputHandler::handleInput(int delta) {
     if (glfwGetKey(Window, GLFW_KEY_Q) == GLFW_PRESS) {
         up--;
     }
-
     int mode = glfwGetInputMode(Window, GLFW_CURSOR);
 
     if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        if (mode != GLFW_CURSOR_HIDDEN) {
-            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        if (mode != GLFW_CURSOR_DISABLED) {
+            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             glfwSetCursorPos(Window, width/2, height/2);
             //if (glfwRawMouseMotionSupported()) glfwSetInputMode(Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         }
@@ -90,9 +80,10 @@ void InputHandler::handleInput(int delta) {
         glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         //if (glfwRawMouseMotionSupported()) glfwSetInputMode(Window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
     }
-
+    constexpr double sens = 0.006;
     yaw -= mouse_x * sens;
     pitch -= mouse_y * sens;
+
 
     if (pitch > M_PI / 2) pitch = M_PI / 2;
     else if (pitch < -M_PI / 2) pitch = -M_PI / 2;

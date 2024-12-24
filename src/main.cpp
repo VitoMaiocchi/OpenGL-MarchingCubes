@@ -7,7 +7,14 @@
 #include "inputHandler.h"
 #include <string>
 
+int viewport_height = 800;
+int viewport_width = 800;
 
+void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+	viewport_height = height;
+	viewport_width = width;
+}
 
 int main() {
 	glfwInit();
@@ -29,11 +36,9 @@ int main() {
 	glfwMakeContextCurrent(window);
 	gladLoadGL();
 	glViewport(0, 0, 800, 800);
-	int windowSize[2] = {800, 800};
-	
-    //    ACTUALLY WICHTIG
+	glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
 
-    Shader shaderProgram("/home/vito/Documents/Coding/c++/test/resources/shader.vert","/home/vito/Documents/Coding/c++/test/resources/shader.frag");
+    Shader shaderProgram("resources/shader.vert","resources/shader.frag");
 
     VertexData vertexData;
 
@@ -57,11 +62,7 @@ int main() {
 
 		InputHandler.handleInput(delta);
 
-		glfwGetWindowSize(window, &windowSize[0], &windowSize[1]);
-		glViewport(0, 0, windowSize[0], windowSize[1]);
-		//std::cout << "X: " << std::to_string(windowSize[0]) << ",  Y: " << std::to_string(windowSize[1]) << "\n";
-
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.32f, 0.81f, 0.58f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_DEPTH_BUFFER_BIT);
 

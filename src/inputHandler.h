@@ -14,8 +14,7 @@ class InputHandler {
         float pitch;
         float yaw;
         GLFWwindow* Window;
-        float sens = 0.005;
-        float speed = 0.03;
+        float speed = 0.01;
 };
 
 #endif

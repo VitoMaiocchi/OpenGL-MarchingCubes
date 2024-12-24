@@ -310,7 +310,22 @@ char triTable[256][16] = {
 {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
-int chunk_size[3] = {30, 30, 30};
+void showProgressBar(int progress, int total) {
+    const int barWidth = 50; 
+    float percentage = (float)progress / total;
+    int pos = barWidth * percentage;
+
+    std::cout << "[";
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << "#";
+        else std::cout << " ";
+    }
+    std::cout << "] " << int(percentage * 100.0) << "%\r"; 
+    std::cout.flush();
+}
+
+#define SIZE 60
+int chunk_size[3] = {SIZE, SIZE, SIZE};
 float dimensions = 0.122f;
 //float threshold = 0.0f;
 
@@ -339,9 +354,13 @@ void generateArrays(std::vector<GLfloat>* Vertecies, std::vector<GLuint>* Indice
     std::vector<GLfloat> vertecies = {};
     std::vector<GLuint> indices = {};
 
-    for (int x = 0; x < chunk_size[0]; x++) for (int y = 0; y < chunk_size[1]; y++) for (int z = 0; z < chunk_size[2]; z++) {
-        int index[3] = {x,y,z};
-        appendCube(&vertecies, &indices, index);
+    std::cout << "Generating Mesh..." << std::endl;
+    for (int x = 0; x < chunk_size[0]; x++) {
+        showProgressBar(x+1, chunk_size[0]);
+        for (int y = 0; y < chunk_size[1]; y++) for (int z = 0; z < chunk_size[2]; z++) {
+            int index[3] = {x,y,z};
+            appendCube(&vertecies, &indices, index);
+        }
     }
     
 
